@@ -1,25 +1,33 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from "react";
+import "./App.css";
+import { Button, ConfigProvider } from "antd";
+import { Route, Routes } from "react-router-dom";
+import Edit from "./pages/edit";
+import Home from "./pages/home";
+import CreateNew from "./pages/create-new";
+import QuizSlide from "./pages/quiz";
+import { Question } from "../types/question";
+import { Quiz } from "../types/quiz";
 
 function App() {
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [quizes, setQuizes] = useState<Quiz[]>([]);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ConfigProvider
+      theme={{
+        token: {
+          colorPrimary: "orange",
+        },
+      }}
+    >
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/edit/:id" element={<Edit />} />
+        <Route path="/create-new" element={<CreateNew />} />
+        <Route path="/quiz/:id" element={<QuizSlide />} />
+      </Routes>
+    </ConfigProvider>
   );
 }
 
