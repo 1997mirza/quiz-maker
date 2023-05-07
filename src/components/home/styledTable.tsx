@@ -9,9 +9,10 @@ import { ProjectPrimaryButton } from "../shared/utilities";
 
 interface StyledTableProps {
   data: Quiz[];
+  loading: boolean;
 }
 
-export default function StyledTable({ data }: StyledTableProps) {
+export default function StyledTable({ data, loading }: StyledTableProps) {
   const { deleteQuiz } = useContext(DataContext);
   const navigate = useNavigate();
 
@@ -60,6 +61,7 @@ export default function StyledTable({ data }: StyledTableProps) {
     <CustomTable
       dataSource={data.map((item: Quiz) => ({ ...item, key: item.id }))}
       columns={columns}
+      loading={loading}
       onRow={(record: any) => {
         return {
           onClick: () => {
