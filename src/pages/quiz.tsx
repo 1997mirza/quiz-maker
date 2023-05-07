@@ -1,11 +1,19 @@
 import styled from "styled-components";
-import ProjectPrimaryButton from "../components/shared/projectPrimaryButton";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { Carousel } from "antd";
 import { CarouselRef } from "antd/lib/carousel";
 import BrainLogo from "../assets/brain-logo.png";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { DataContext } from "../DataProvider";
+import {
+  Container,
+  ProjectPrimaryButton,
+} from "../components/shared/utilities";
+import { Question } from "../../types/question";
+
+interface ExtendedQuestion extends Question {
+  isAnswerShown: boolean;
+}
 
 export default function QuizSlider() {
   const [carouselIndex, setCarouselIndex] = useState(0);
@@ -29,7 +37,9 @@ export default function QuizSlider() {
   useEffect(() => {
     const originalObject = getQuizWithQuestions(parseInt(params?.id as string));
     if (!originalObject) {
-      console.log("nema kviza");
+      setTimeout(() => {
+        navigate("/");
+      }, 3500);
       return;
     }
     if (!originalObject) return;
@@ -63,10 +73,16 @@ export default function QuizSlider() {
     }
   };
 
-  if (!quiz) return null;
-
+  if (!quiz)
+    return (
+      <CustomContainer style={{ textAlign: "center" }}>
+        <h3 style={{ color: "white" }}>
+          The quiz was not found. You will be redirected to the homepage.
+        </h3>
+      </CustomContainer>
+    );
   return (
-    <Container>
+    <CustomContainer>
       {!isQuizFinished && (
         <h2 style={{ color: "white", marginTop: "0" }}>{quiz.name}</h2>
       )}
@@ -83,7 +99,7 @@ export default function QuizSlider() {
               more quizzes. Click below to explore and challenge yourself.
             </h3>
             <div onClick={() => navigate("/")}>
-              <ProjectPrimaryButton text={"Explore more quizzes"} />
+              <ProjectPrimaryButton>Explore more quizzes</ProjectPrimaryButton>
             </div>
           </div>
         </div>
@@ -91,7 +107,7 @@ export default function QuizSlider() {
         <>
           <Carousel ref={carouselRef} autoplay={false} dots={false}>
             {quiz?.questions &&
-              quiz.questions.map((el: any, index) => (
+              quiz.questions.map((el: ExtendedQuestion, index) => (
                 <div key={index} style={{ marginLeft: "1px" }}>
                   <div style={{ color: "white" }}>
                     Question{` ${index + 1}/${quiz.questions.length}`}
@@ -105,48 +121,46 @@ export default function QuizSlider() {
                 </div>
               ))}
           </Carousel>
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <div
+          <ButtonContainer>
+            <ProjectPrimaryButton
               onClick={() => {
                 if (carouselIndex === 0) return;
                 setCarouselIndex(carouselIndex - 1);
                 carouselRef.current?.prev();
               }}
+              disabled={carouselIndex === 0}
             >
-              <ProjectPrimaryButton
-                isDisabled={carouselIndex === 0}
-                text={"Previous question"}
-              />
-            </div>
+              Previous question
+            </ProjectPrimaryButton>
             {!quiz.questions[carouselIndex].isAnswerShown && (
-              <div onClick={() => updateAnswerStatus(carouselIndex)}>
-                <ProjectPrimaryButton text={"Prikazi odgovor"} />
-              </div>
+              <ProjectPrimaryButton
+                onClick={() => updateAnswerStatus(carouselIndex)}
+              >
+                Show answer
+              </ProjectPrimaryButton>
             )}
             {carouselIndex + 1 < quiz.questions.length ? (
-              <div
+              <ProjectPrimaryButton
                 onClick={() => {
                   setCarouselIndex(carouselIndex + 1);
                   carouselRef.current?.next();
                 }}
               >
-                <ProjectPrimaryButton text={"Next question"} />
-              </div>
+                Next question
+              </ProjectPrimaryButton>
             ) : (
-              <div onClick={() => setIsQuizFinished(true)}>
-                <ProjectPrimaryButton text={"Finish quiz"} />
-              </div>
+              <ProjectPrimaryButton onClick={() => setIsQuizFinished(true)}>
+                Finish quiz
+              </ProjectPrimaryButton>
             )}
-          </div>
+          </ButtonContainer>
         </>
       )}
-    </Container>
+    </CustomContainer>
   );
 }
 
-const Container = styled.div`
-  width: 1180px;
-  margin: auto;
+const CustomContainer = styled(Container)`
   .slick-slide {
     overflow: hidden !important;
   }
@@ -159,4 +173,12 @@ const QuestionArea = styled.div`
   border-radius: 8px;
   margin-left: 1px;
   margin-right: 1px;
+`;
+
+const ButtonContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  @media (max-width: 550px) {
+    flex-direction: column;
+  }
 `;

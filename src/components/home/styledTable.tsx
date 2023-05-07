@@ -1,27 +1,70 @@
 import { Table } from "antd";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
-import { Question } from "../../../types/question";
+import { Quiz } from "../../../types/quiz";
+import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
+import { useContext } from "react";
+import { DataContext } from "../../DataProvider";
+import { ProjectPrimaryButton } from "../shared/utilities";
 
 interface StyledTableProps {
-  pagination: any;
-  setPagination: any;
-  data: any;
-  columns: any;
+  data: Quiz[];
 }
 
-export function StyledTable({ data, columns }: StyledTableProps) {
+export default function StyledTable({ data }: StyledTableProps) {
+  const { deleteQuiz } = useContext(DataContext);
   const navigate = useNavigate();
+
+  const columns = [
+    {
+      title: "Id",
+      dataIndex: "id",
+      key: "id",
+    },
+    {
+      title: "Name",
+      dataIndex: "name",
+      key: "name",
+    },
+    {
+      title: "Action",
+      render: ({ id }: Quiz) => (
+        <>
+          <ProjectPrimaryButton
+            type="primary"
+            icon={<DeleteOutlined />}
+            style={{ marginRight: "10px" }}
+            onClick={(e) => {
+              e.stopPropagation();
+              deleteQuiz(id);
+            }}
+          >
+            Delete
+          </ProjectPrimaryButton>
+          <ProjectPrimaryButton
+            type="primary"
+            icon={<EditOutlined />}
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/quiz/${id}/edit`);
+            }}
+          >
+            Edit
+          </ProjectPrimaryButton>
+        </>
+      ),
+    },
+  ];
+
   return (
     <CustomTable
-      dataSource={data.map((item: Question) => ({ ...item, key: item.id }))}
+      dataSource={data.map((item: Quiz) => ({ ...item, key: item.id }))}
       columns={columns}
-      onRow={(record, rowIndex) => {
+      onRow={(record: any) => {
         return {
           onClick: () => {
-            // @ts-ignore
             navigate(`/quiz/${record.id}`);
-          }, // click row
+          },
         };
       }}
     />

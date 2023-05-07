@@ -4,10 +4,13 @@ import { Button, Input, message, Select } from "antd";
 import TextArea from "antd/es/input/TextArea";
 import { DataContext } from "../DataProvider";
 import { CloseCircleOutlined } from "@ant-design/icons";
-import ProjectPrimaryButton from "../components/shared/projectPrimaryButton";
 import BrainLogo from "../assets/brain-logo.png";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { Question } from "../../types/question";
+import {
+  Container,
+  Title,
+  ProjectPrimaryButton,
+} from "../components/shared/utilities";
 
 interface QuizQuestion {
   type: "existing" | "new";
@@ -16,8 +19,8 @@ interface QuizQuestion {
   answer?: string;
 }
 
-interface newQuizProps {
-  name?: string;
+export interface NewQuizProps {
+  name: string;
   questions: QuizQuestion[];
 }
 
@@ -26,10 +29,11 @@ export default function CreateNew() {
   const [isQuizAdded, setIsQuizAdded] = useState(false);
   const [questions, setQuestions] =
     useState<{ value: number; label: string }[]>();
-  const [newQuiz, setNewQuiz] = useState<newQuizProps>({
-    name: undefined,
+  const [newQuiz, setNewQuiz] = useState<NewQuizProps>({
+    name: "",
     questions: [],
   });
+  const [quizFound, setQuizFound] = useState(false);
 
   const router = useLocation();
   const currentRoute = router.pathname;
@@ -40,7 +44,6 @@ export default function CreateNew() {
   const [hasName, setHasName] = useState(true);
   const navigate = useNavigate();
   const onChange = (value: number, index: number) => {
-    console.log("value", value, "index", index);
     const alreadySelected = newQuiz.questions.some(
       (question) => question.id === value
     );
@@ -55,16 +58,17 @@ export default function CreateNew() {
   };
 
   const getQuestionById = (questionId: number) => {
-    console.log("question od", questionId);
     return existingQuestions?.find((question) => question.id === questionId);
   };
 
   useEffect(() => {
     if (isEditing) {
       const quizForEdit = getQuiz(parseInt(params?.id as string));
-      console.log("quiz", quizForEdit);
+      setQuizFound(!!quizForEdit);
       if (!quizForEdit) {
-        message.error("Quiz not found");
+        setTimeout(() => {
+          navigate("/");
+        }, 3500);
       } else {
         setNewQuiz({
           name: quizForEdit.name,
@@ -87,17 +91,13 @@ export default function CreateNew() {
     );
   }, []);
 
-  const onChangeTextArea = (value: string, index: number) => {
+  const onChangeTextArea = (
+    value: string,
+    index: number,
+    isQuestion?: boolean
+  ) => {
     const newQuestions = newQuiz.questions;
-    newQuestions[index].question = value;
-    setNewQuiz((prevState) => ({
-      ...prevState,
-      questions: newQuestions,
-    }));
-  };
-  const onChangeTextAreaAnswer = (value: string, index: number) => {
-    const newQuestions = newQuiz.questions;
-    newQuestions[index].answer = value;
+    newQuestions[index][isQuestion ? "question" : "answer"] = value;
     setNewQuiz((prevState) => ({
       ...prevState,
       questions: newQuestions,
@@ -133,14 +133,23 @@ export default function CreateNew() {
     if (errorArray.some((bool) => bool)) {
       return;
     } else {
-      console.log("ovdje sma");
       addNewQuiz(newQuiz, parseInt(params?.id as string));
       setIsQuizAdded(true);
     }
   };
 
+  if (isEditing && !quizFound) {
+    return (
+      <CustomContainer style={{ textAlign: "center" }}>
+        <h3 style={{ color: "white" }}>
+          The quiz was not found. You will be redirected to the homepage.
+        </h3>
+      </CustomContainer>
+    );
+  }
+
   return (
-    <Container>
+    <CustomContainer>
       {isQuizAdded ? (
         <div>
           <div style={{ textAlign: "center" }}>
@@ -150,22 +159,19 @@ export default function CreateNew() {
               alt="quiz-logo"
             />
             <h3 style={{ color: "white" }}>
-              Congratulations on completing the quiz! Test your knowledge with
-              more quizzes. Click below to explore and challenge yourself.
+              Success! Your quiz has been {isEditing ? "edited" : "added"}.
             </h3>
-            <div onClick={() => navigate("/")}>
-              <ProjectPrimaryButton text={"Explore more quizzes"} />
-            </div>
+            <ProjectPrimaryButton onClick={() => navigate("/")}>
+              Go to Homepage
+            </ProjectPrimaryButton>
           </div>
         </div>
       ) : (
         <>
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <h2 style={{ color: "white", marginTop: "0" }}>Create new Quiz</h2>
-            <h2 style={{ color: "white", marginTop: "0" }}>
-              Question Count: {newQuiz.questions.length}
-            </h2>
-          </div>
+          <TitleWrapper>
+            <Title> {isEditing ? "Edit Quiz" : "Create new Quiz"}</Title>
+            <Title>Question Count: {newQuiz.questions.length}</Title>
+          </TitleWrapper>
           <p style={{ color: "white" }}>Quiz Name:</p>
           <Input
             value={newQuiz.name}
@@ -177,16 +183,12 @@ export default function CreateNew() {
             }}
           />
           {!hasName && <p style={{ color: "red" }}>* This field is required</p>}
-          {newQuiz.questions.map((question: any, indexGlobal) => {
+          {newQuiz.questions.map((question: QuizQuestion, indexGlobal) => {
             if (question.type === "existing") {
               return (
                 <div key={indexGlobal}>
-                  <div
-                    key={indexGlobal}
-                    style={{ marginTop: "10px", display: "flex" }}
-                  >
+                  <SelectWrapper>
                     <Select
-                      style={{ width: "100%" }}
                       showSearch
                       placeholder="Select a question"
                       optionFilterProp="children"
@@ -216,7 +218,7 @@ export default function CreateNew() {
                       }}
                       icon={<CloseCircleOutlined />}
                     ></Button>
-                  </div>
+                  </SelectWrapper>
                   {errors[indexGlobal] && (
                     <p style={{ color: "red" }}>
                       * Please select a question or remove the row.
@@ -228,24 +230,22 @@ export default function CreateNew() {
               return (
                 <div key={indexGlobal}>
                   <div style={{ marginTop: "10px", display: "flex" }}>
-                    <div style={{ width: "100%", display: "flex" }}>
-                      <TextArea
-                        style={{ width: "75%", marginRight: "10px" }}
+                    <NewQuestionWrapper>
+                      <CustomTextArea
                         placeholder={"Your question"}
                         onChange={(e) => {
-                          onChangeTextArea(e.target.value, indexGlobal);
+                          onChangeTextArea(e.target.value, indexGlobal, true);
                         }}
                         value={newQuiz.questions[indexGlobal].question}
                       />
-                      <TextArea
+                      <CustomTextArea
                         onChange={(e) => {
-                          onChangeTextAreaAnswer(e.target.value, indexGlobal);
+                          onChangeTextArea(e.target.value, indexGlobal);
                         }}
-                        style={{ width: "25%" }}
                         placeholder={"Your answer"}
                         value={newQuiz.questions[indexGlobal].answer}
                       />
-                    </div>
+                    </NewQuestionWrapper>
                     <Button
                       style={{ marginLeft: "10px" }}
                       type="primary"
@@ -275,7 +275,8 @@ export default function CreateNew() {
             }
           })}
           <AddQuestionOptionsContainer>
-            <Option1
+            <Option
+              $option={"option1"}
               onClick={() => {
                 setNewQuiz((prevQuiz) => ({
                   ...prevQuiz,
@@ -287,8 +288,9 @@ export default function CreateNew() {
               }}
             >
               Add new Question
-            </Option1>
-            <Option2
+            </Option>
+            <Option
+              $option={"option2"}
               onClick={() => {
                 setNewQuiz((prevQuiz) => ({
                   ...prevQuiz,
@@ -300,20 +302,20 @@ export default function CreateNew() {
               }}
             >
               Choose existing question
-            </Option2>
+            </Option>
           </AddQuestionOptionsContainer>
-          <div onClick={() => onValidate()}>
-            <ProjectPrimaryButton text={"Add quiz"} />
+          <div>
+            <ProjectPrimaryButton onClick={() => onValidate()}>
+              {isEditing ? "Save" : "Add Quiz"}
+            </ProjectPrimaryButton>
           </div>
         </>
       )}
-    </Container>
+    </CustomContainer>
   );
 }
 
-const Container = styled.div`
-  width: 1180px;
-  margin: auto;
+const CustomContainer = styled(Container)`
   label {
     color: white !important;
   }
@@ -321,29 +323,89 @@ const Container = styled.div`
     display: unset !important;
   }
 `;
+const TitleWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
+  h2 {
+    margin-top: 0;
+    @media (max-width: 400px) {
+      font-size: 16px;
+    }
+  }
+`;
+
+const NewQuestionWrapper = styled.div`
+  width: 100%;
+  display: flex;
+  > :first-child {
+    width: 75%;
+    margin-right: 10px;
+    @media (max-width: 800px) {
+      width: 66%;
+    }
+    @media (max-width: 650px) {
+      margin-bottom: 5px;
+    }
+  }
+  > :nth-child(2) {
+    width: 25%;
+    @media (max-width: 800px) {
+      width: 34%;
+    }
+  }
+  @media (max-width: 650px) {
+    flex-direction: column;
+  }
+`;
+const CustomTextArea = styled(TextArea)`
+  @media (max-width: 650px) {
+    width: 100% !important;
+  }
+`;
+
 const AddQuestionOptionsContainer = styled.div`
   width: 100%;
   display: flex;
-  height: 32px;
   margin-top: 10px;
+  @media (max-width: 460px) {
+    flex-direction: column;
+  }
 `;
-const Option1 = styled.div`
+
+const Option = styled.div<{ $option: "option1" | "option2" }>`
   width: 50%;
-  background-color: white;
-  border-bottom-left-radius: 6px;
-  border-top-left-radius: 6px;
+  height: 32px;
+  background-color: ${(props) =>
+    props.$option == "option1" ? "white" : "#d73b21"};
   text-align: center;
-  color: #d73b21;
+  color: ${(props) => (props.$option == "option1" ? "#d73b21" : "white")};
   padding-top: 4px;
   cursor: pointer;
+  :first-of-type {
+    border-bottom-left-radius: 6px;
+    border-top-left-radius: 6px;
+    @media (max-width: 460px) {
+      border-radius: 6px;
+      margin-bottom: 6px;
+    }
+  }
+  :last-of-type {
+    border-bottom-right-radius: 6px;
+    border-top-right-radius: 6px;
+    @media (max-width: 460px) {
+      border-radius: 6px;
+    }
+  }
+  @media (max-width: 460px) {
+    width: 100%;
+    padding-top: 4px;
+  }
 `;
-const Option2 = styled.div`
-  width: 50%;
-  background-color: #d73b21;
-  border-bottom-right-radius: 6px;
-  border-top-right-radius: 6px;
-  text-align: center;
-  color: white;
-  padding-top: 4px;
-  cursor: pointer;
+const SelectWrapper = styled.div`
+  display: flex;
+  margin-top: 10px;
+
+  & > .ant-select {
+    flex-grow: 1;
+  }
 `;

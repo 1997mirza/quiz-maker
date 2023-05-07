@@ -1,7 +1,7 @@
 import React, { createContext, useState, ReactNode } from "react";
 import { Quiz } from "../types/quiz";
 import { Question } from "../types/question";
-import { set } from "react-hook-form";
+import { NewQuizProps } from "./pages/create-new";
 
 interface MyProviderProps {
   children: ReactNode;
@@ -21,7 +21,11 @@ interface ContextProps {
       }
     | undefined;
   existingQuestions: Question[];
-  addNewQuiz: (quiz: any, isEditing?: number) => void;
+  addNewQuiz: (quiz: NewQuizProps, isEditing?: number) => void;
+}
+
+interface ExtendedQuestion extends Question {
+  type: "new" | "existing";
 }
 const DataContext = createContext<ContextProps>({} as ContextProps);
 
@@ -34,71 +38,6 @@ const DataProvider = ({ children }: MyProviderProps) => {
     },
     {
       id: 2,
-      name: "Brain Teaser Quiz",
-      questions: [1, 12, 13, 14, 15, 16, 17, 18, 19, 20],
-    },
-    {
-      id: 3,
-      name: "Brain Teaser Quiz",
-      questions: [1, 12, 13, 14, 15, 16, 17, 18, 19, 20],
-    },
-    {
-      id: 4,
-      name: "Brain Teaser Quiz",
-      questions: [1, 12, 13, 14, 15, 16, 17, 18, 19, 20],
-    },
-    {
-      id: 5,
-      name: "Brain Teaser Quiz",
-      questions: [1, 12, 13, 14, 15, 16, 17, 18, 19, 20],
-    },
-    {
-      id: 6,
-      name: "Brain Teaser Quiz",
-      questions: [1, 12, 13, 14, 15, 16, 17, 18, 19, 20],
-    },
-    {
-      id: 7,
-      name: "Brain Teaser Quiz",
-      questions: [1, 12, 13, 14, 15, 16, 17, 18, 19, 20],
-    },
-    {
-      id: 8,
-      name: "Brain Teaser Quiz",
-      questions: [1, 12, 13, 14, 15, 16, 17, 18, 19, 20],
-    },
-    {
-      id: 9,
-      name: "Brain Teaser Quiz",
-      questions: [1, 12, 13, 14, 15, 16, 17, 18, 19, 20],
-    },
-    {
-      id: 10,
-      name: "Brain Teaser Quiz",
-      questions: [1, 12, 13, 14, 15, 16, 17, 18, 19, 20],
-    },
-    {
-      id: 11,
-      name: "Brain Teaser Quiz",
-      questions: [1, 12, 13, 14, 15, 16, 17, 18, 19, 20],
-    },
-    {
-      id: 12,
-      name: "Brain Teaser Quiz",
-      questions: [1, 12, 13, 14, 15, 16, 17, 18, 19, 20],
-    },
-    {
-      id: 13,
-      name: "Brain Teaser Quiz",
-      questions: [1, 12, 13, 14, 15, 16, 17, 18, 19, 20],
-    },
-    {
-      id: 14,
-      name: "Brain Teaser Quiz",
-      questions: [1, 12, 13, 14, 15, 16, 17, 18, 19, 20],
-    },
-    {
-      id: 15,
       name: "Brain Teaser Quiz",
       questions: [1, 12, 13, 14, 15, 16, 17, 18, 19, 20],
     },
@@ -245,14 +184,14 @@ const DataProvider = ({ children }: MyProviderProps) => {
     };
   };
 
-  const addNewQuiz = (quiz: any, isEditing?: number) => {
-    console.log("evo kviza", quiz);
+  const addNewQuiz = (quiz: NewQuizProps, isEditing?: number) => {
     const newQuiz: Quiz = {
-      id: isEditing ?? quizzes[quizzes.length - 1].id + 1,
-      name: quiz.name,
+      id: isEditing ? isEditing : quizzes[quizzes.length - 1].id + 1,
+      name: quiz?.name,
       questions: [],
     };
-    const potentialModifiedQuestions: any = [];
+    const potentialModifiedQuestions: ExtendedQuestion[] = [];
+    const copyOfQuestions = questions;
 
     quiz.questions.map((question: any) => {
       if (question.type === "existing") {
@@ -263,32 +202,35 @@ const DataProvider = ({ children }: MyProviderProps) => {
           potentialModifiedQuestions.push(question);
           newQuiz.questions.push(question.id);
         } else {
-          setQuestions((prevState) => [
-            ...prevState,
-            {
-              id: questions[questions.length - 1].id + 1,
-              question: question.question,
-              answer: question.answer,
-            },
-          ]);
-          newQuiz.questions.push(questions[questions.length - 1].id + 1);
+          copyOfQuestions.push({
+            id: copyOfQuestions[copyOfQuestions.length - 1].id + 1,
+            question: question.question,
+            answer: question.answer,
+          });
+          newQuiz.questions.push(
+            copyOfQuestions[copyOfQuestions.length - 1].id
+          );
         }
       }
     });
+
     if (!!isEditing) {
-      const updatedQuestion = questions.map((question: Question) => {
+      const updatedQuestion = copyOfQuestions.map((question: Question) => {
         const newQuestion = potentialModifiedQuestions.find(
           (q: any) => q.id === question.id
         );
         if (newQuestion) {
-          return newQuestion;
+          return {
+            id: newQuestion.id,
+            question: newQuestion.question,
+            answer: newQuestion.answer,
+          };
         }
         return question;
       });
       setQuestions(updatedQuestion);
     }
-    console.log("gotovo", newQuiz);
-    if (isEditing) {
+    if (!!isEditing) {
       const updatedQuizzes = quizzes.map((el: Quiz) => {
         if (el.id === newQuiz.id) {
           return newQuiz;
@@ -303,8 +245,7 @@ const DataProvider = ({ children }: MyProviderProps) => {
   };
 
   const getQuiz = (quizId: number) => {
-    const selectedQuiz = quizzes.find((quiz) => quiz.id === quizId);
-    return selectedQuiz;
+    return quizzes.find((quiz) => quiz.id === quizId);
   };
 
   return (

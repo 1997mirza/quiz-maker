@@ -30,8 +30,7 @@ const CustomContainer = styled(Container)`
   display: flex;
   justify-content: space-between;
   color: white;
-  @media (max-width: 400px) {
-  }
+  padding-bottom: 0 !important;
 `;
 const QuizLogo = styled.img`
   width: 80px;

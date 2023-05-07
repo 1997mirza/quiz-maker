@@ -14,9 +14,13 @@ export const MobileContainer = styled.div`
 export const Container = styled.div`
   width: 1180px;
   margin: auto;
+  padding-bottom: 20px;
   @media (max-width: 1220px) {
     width: auto;
-    padding: 0 20px;
+    padding: 0 20px 20px;
+  }
+  @media (max-width: 360px) {
+    padding: 0 10px 10px;
   }
 `;
 
@@ -30,4 +34,8 @@ export const ProjectPrimaryButton = styled(Button)`
     background-color: #e24e32;
     color: white !important;
   }
+`;
+export const Title = styled.h2`
+  margin-top: 0;
+  color: white;
 `;
