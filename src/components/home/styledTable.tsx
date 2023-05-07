@@ -1,5 +1,7 @@
 import { Table } from "antd";
 import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
+import { Question } from "../../../types/question";
 
 interface StyledTableProps {
   pagination: any;
@@ -9,19 +11,17 @@ interface StyledTableProps {
 }
 
 export function StyledTable({ data, columns }: StyledTableProps) {
+  const navigate = useNavigate();
   return (
     <CustomTable
-      dataSource={data}
+      dataSource={data.map((item: Question) => ({ ...item, key: item.id }))}
       columns={columns}
       onRow={(record, rowIndex) => {
         return {
-          onClick: (event) => {
-            console.log("event", record);
+          onClick: () => {
+            // @ts-ignore
+            navigate(`/quiz/${record.id}`);
           }, // click row
-          onDoubleClick: (event) => {}, // double click row
-          onContextMenu: (event) => {}, // right button click row
-          onMouseEnter: (event) => {}, // mouse enter row
-          onMouseLeave: (event) => {}, // mouse leave row
         };
       }}
     />
@@ -31,4 +31,17 @@ export function StyledTable({ data, columns }: StyledTableProps) {
 const CustomTable = styled(Table)`
   max-width: 1180px;
   margin: auto;
+  .ant-table-row {
+    cursor: pointer;
+  }
+  .ant-spin-container {
+    background-color: white;
+    border-radius: 8px;
+  }
+  .ant-pagination {
+    padding-bottom: 16px;
+  }
+  @media (max-width: 1220px) {
+    width: auto;
+  }
 `;

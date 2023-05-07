@@ -1,7 +1,7 @@
 import { Question } from "./question";
 
 export type Quiz = {
-  id: string;
+  id: number;
   name: string;
-  questions: Question[];
+  questions: number[];
 };
