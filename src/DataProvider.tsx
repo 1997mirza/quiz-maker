@@ -193,7 +193,7 @@ const DataProvider = ({ children }: MyProviderProps) => {
     const potentialModifiedQuestions: ExtendedQuestion[] = [];
     const copyOfQuestions = questions;
 
-    quiz.questions.map((question: any) => {
+    quiz.questions.forEach((question: any) => {
       if (question.type === "existing") {
         newQuiz.questions.push(question.id);
       } else {

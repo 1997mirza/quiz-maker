@@ -117,7 +117,7 @@ export default function CreateNew() {
 
     const errorArray: boolean[] = [];
 
-    newQuiz.questions.map((question) => {
+    newQuiz.questions.forEach((question) => {
       if (
         (question.type === "existing" && !!question.id) ||
         (question.type === "new" && !!question.question && !!question.answer)
@@ -376,9 +376,9 @@ const Option = styled.div<{ $option: "option1" | "option2" }>`
   width: 50%;
   height: 32px;
   background-color: ${(props) =>
-    props.$option == "option1" ? "white" : "#d73b21"};
+    props.$option === "option1" ? "white" : "#d73b21"};
   text-align: center;
-  color: ${(props) => (props.$option == "option1" ? "#d73b21" : "white")};
+  color: ${(props) => (props.$option === "option1" ? "#d73b21" : "white")};
   padding-top: 4px;
   cursor: pointer;
   :first-of-type {
