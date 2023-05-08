@@ -30,7 +30,7 @@ export default function Home() {
               <div style={{ textAlign: "center" }}>
                 <ProjectPrimaryButton
                   onClick={() => {
-                    setNumDisplayed((prevState) => prevState + 2);
+                    setNumDisplayed((prevState) => prevState + 8);
                   }}
                 >
                   Load more
