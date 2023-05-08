@@ -46,6 +46,7 @@ export default function Home() {
         <NoProjectSection>
           Currently, there are no quizzes available 😞 .Would you like to create
           a new one?
+          <br />
           <Link to={"/create-new"}>
             <ProjectPrimaryButton>Create new one</ProjectPrimaryButton>
           </Link>

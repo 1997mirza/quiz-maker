@@ -33,124 +33,280 @@ const DataProvider = ({ children }: MyProviderProps) => {
   const [quizzes, setQuizzes] = useState<Quiz[]>([
     {
       id: 1,
-      name: "New Year's Quiz",
+      name: "Sportske legende",
       questions: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     },
     {
       id: 2,
-      name: "Brain Teaser Quiz",
-      questions: [1, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+      name: "Informatika",
+      questions: [11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+    },
+    {
+      id: 3,
+      name: "Mozgalice",
+      questions: [21, 22, 23, 24, 25, 26, 27, 28, 29, 30],
+    },
+    {
+      id: 4,
+      name: "Opca kultura",
+      questions: [31, 32, 33, 34, 35, 36, 37, 38, 39, 40],
+    },
+    {
+      id: 5,
+      name: "Random 1",
+      questions: [1, 22, 13, 5],
+    },
+    {
+      id: 6,
+      name: "Random 2",
+      questions: [1, 22, 13, 16],
+    },
+    {
+      id: 7,
+      name: "Random 3",
+      questions: [1, 22, 13, 8],
+    },
+    {
+      id: 8,
+      name: "Random 4",
+      questions: [1, 9, 10, 37],
+    },
+    {
+      id: 9,
+      name: "Random 5",
+      questions: [1, 35, 4, 1],
+    },
+    {
+      id: 10,
+      name: "Random 6",
+      questions: [6, 12, 13, 33],
+    },
+    {
+      id: 11,
+      name: "Random 7",
+      questions: [5, 4, 1, 24],
+    },
+    {
+      id: 12,
+      name: "Random 8",
+      questions: [7, 5, 34, 39],
     },
   ]);
   const [questions, setQuestions] = useState<Question[]>([
     {
       id: 1,
       question:
-        "What is the most popular color associated with New Year's Eve celebrations?",
-      answer: "Gold or silver",
+        "Koja teniserka ima najviše osvojenih Grand Slam turnira u singlu u istoriji tenisa?",
+      answer: "Serena Williams sa 23 osvojena Grand Slam titule",
     },
     {
       id: 2,
       question:
-        "In what year did the first New Year's Eve celebration take place in Times Square, New York City?",
-      answer: "1904",
+        "Koja atletičarka je držala svjetski rekord u skoku u dalj najduže u istoriji?",
+      answer:
+        "Galina Čistjakova sa skokom od 7.52m koji je držao od 1988. do 2018. godine.",
     },
     {
       id: 3,
       question:
-        "What is the name of the traditional Scottish New Year's Eve celebration?",
-      answer: "Hogmanay",
+        "Koja je zemlja osvojila najviše medalja u istoriji Olimpijskih igara?",
+      answer: "SAD sa vise od 2,500 osvojene medalje.",
     },
     {
       id: 4,
       question:
-        "What famous song is traditionally sung at the stroke of midnight on New Year's Eve?",
-      answer: "Auld Lang Syne",
+        "Ko je najbrži trkač na 100 metara u istoriji atletike i koliko je brzo trčao?",
+      answer: "Usain Bolt sa vremenom od 9.58 sekundi.",
     },
     {
       id: 5,
       question:
-        "What fruit is traditionally eaten at New Year's in Spain and some Latin American countries?",
-      answer: "Grapes",
+        "Ko je najuspješniji vozač u istoriji Formule 1 i koliko šampionata je osvojio?",
+      answer: "Michael Schumacher sa sedam osvojenih šampionata.",
     },
     {
       id: 6,
       question:
-        "In many cultures, it is customary to make New Year's resolutions. What is the most common resolution made in the United States?",
-      answer: "To exercise more and lose weight",
+        "Ko je najbolji strijelac u istoriji nogometa i koliko golova je postigao?",
+      answer: "Josef Bican sa preko 805 postignutih golova u svojoj karijeri.",
     },
     {
       id: 7,
       question:
-        "What is the name of the traditional Japanese New Year's dish that is made with soba noodles?",
-      answer: "Toshikoshi soba",
+        "Ko je najuspješniji teniser svih vremena po broju osvojenih Grand Slam titula u singlu i koliko ih je osvojio?",
+      answer: "Roger Federer sa 20 osvojenih Grand Slam titula.",
     },
     {
       id: 8,
       question:
-        "In what year did the Tournament of Roses Parade first take place on New Year's Day in Pasadena, California?\n",
-      answer: "1890",
+        "Koja zemlja je osvojila najviše zlatnih medalja u istoriji Zimskih olimpijskih igara?",
+      answer: "Norveška sa 132 osvojene zlatne medalje.",
     },
     {
       id: 9,
       question:
-        "In which country is it traditional to give red envelopes filled with money to children on New Year's Day?",
-      answer: "China",
+        "Koja košarkaška legenda je osvojila najviše NBA prstenova u istoriji i koliko ih ima?",
+      answer: "Bill Russell sa 11 osvojenih NBA prstenova.",
     },
     {
       id: 10,
       question:
-        "What is the name of the first person to greet visitors to your home on New Year's Day in Ireland?",
-      answer: 'The "first footer" or "the lucky bird."',
+        "Koja plivačica drži svjetski rekord u disciplini 50m slobodnim stilom i koliko brzo je plivala?",
+      answer: "Sarah Sjöström sa vremenom od 23.67 sekundi.",
     },
     {
       id: 11,
-      question:
-        "What starts with an E, ends with an E, but contains only one letter?",
-      answer: "An envelope",
+      question: "Koje je ime prvog programskog jezika?",
+      answer: "Fortran",
     },
     {
       id: 12,
-      question: "What is always in front of you but can't be seen?",
-      answer: "The future",
+      question: "Koje su tri osnovne paradigme programiranja?",
+      answer: "Strukturno, objektno i funkcionalno programiranje",
     },
     {
       id: 13,
-      question:
-        "I am not alive, but I grow; I don't have lungs, but I need air; I don't have a mouth, but water kills me. What am I?",
-      answer: "Fire",
+      question: "Koja se programska paradigma koristi u React-u?",
+      answer: "Deklarativno programiranje",
     },
     {
       id: 14,
-      question: "What has a heart that doesn't beat?",
-      answer: "An artichoke",
+      question: "Šta predstavlja skraćenica AJAX?",
+      answer: "Asynchronous JavaScript and XML",
     },
-    { id: 15, question: "What gets wet while drying?", answer: "A towel" },
+    {
+      id: 15,
+      question: "Koja je složenost binarne pretrage?",
+      answer: "O(log n)",
+    },
     {
       id: 16,
-      question: "What has a head and a tail, but no body?",
-      answer: "A coin",
+      question: "Šta predstavlja skraćenica SQL?",
+      answer: "Structured Query Language",
     },
     {
       id: 17,
-      question: "What is so fragile that saying its name breaks it?",
-      answer: "Silence",
+      question: "Šta je to Big O notaicja?",
+      answer: "Notacija kojom se opisuje složenost algoritama",
     },
     {
       id: 18,
-      question:
-        "What is black when you buy it, red when you use it, and gray when you throw it away?",
-      answer: "Charcoal",
+      question: "Koja je složenost algoritma bubble sort?",
+      answer: "O(n^2)",
     },
     {
       id: 19,
-      question: "What is full of holes but can hold water?",
-      answer: "A sponge",
+      question: "Koja se programska paradigma koristi u Angular-u?",
+      answer: "Objektno orijentisano programiranje",
     },
     {
       id: 20,
-      question: "What is something you will never see again?",
-      answer: "Yesterday",
+      question: "Šta predstavlja skraćenica REST?",
+      answer: "Representational State Transfer",
+    },
+    {
+      id: 21,
+      question:
+        "Što je to što svi imaju, a najčešće se koristi kad je čovjek mrtav?",
+      answer: "Ime",
+    },
+    {
+      id: 22,
+      question:
+        "Koje slovo engleske abecede se ne pojavljuje u nazivu nijedne od država svijeta?",
+      answer: "Q",
+    },
+    {
+      id: 23,
+      question:
+        "Što se događa jednom u minutu, dvaput u trenu, a nikada u tisućljeću?",
+      answer: "Slovo M",
+    },
+    {
+      id: 24,
+      question: "Što teče bez da se mičemo?",
+      answer: "Vrijeme",
+    },
+    {
+      id: 25,
+      question: "Koliko je puta moguće presaviti papir na pola?",
+      answer: "Najviše 7 puta",
+    },
+    {
+      id: 26,
+      question: "Koje se tri riječi najčešće koriste u engleskom jeziku?",
+      answer: "I, you, the",
+    },
+    {
+      id: 27,
+      question:
+        "Koja životinja u engleskom jeziku počinje s tri ista slova kao i kraj engleskog alfabeta?",
+      answer: "Zebra",
+    },
+    {
+      id: 28,
+      question: "Koja se riječ u engleskom jeziku sastoji od svih suglasnika?",
+      answer: "Rhythm",
+    },
+    {
+      id: 29,
+      question: "Koliko je rupa na klasičnoj švicarskoj vojnoj nožici?",
+      answer: "12",
+    },
+    {
+      id: 30,
+      question: "Kako se zove proces kojim se odvoje miješane tvari?",
+      answer: "Destilacija",
+    },
+    {
+      id: 31,
+      question: "Ko je napisao roman 'Rat i mir'?",
+      answer: "Lav Nikolajevič Tolstoj",
+    },
+    {
+      id: 32,
+      question: "Ko je napisao dramu 'Hamlet'?",
+      answer: "William Shakespeare",
+    },
+    {
+      id: 33,
+      question: "Ko je autor knjige 'Sumnjivo lice'?",
+      answer: "Branislav Nušić",
+    },
+    {
+      id: 34,
+      question: "Ko je prvi čovjek koji je zakoračio na Mjesec?",
+      answer: "Neil Armstrong",
+    },
+    {
+      id: 35,
+      question: "Kako se zove najveći kontinent na Zemlji?",
+      answer: "Azija",
+    },
+    {
+      id: 36,
+      question: "Ko je napisao knjigu '1984'?",
+      answer: "George Orwell",
+    },
+    {
+      id: 37,
+      question: "Ko je bio prvi predsjednik SAD-a?",
+      answer: "George Washington",
+    },
+    {
+      id: 38,
+      question: "Ko je izumio telefon?",
+      answer: "Alexander Graham Bell",
+    },
+    {
+      id: 39,
+      question: "Ko je bio vođa Oktobarske revolucije u Rusiji?",
+      answer: "Vladimir Ilič Lenjin",
+    },
+    {
+      id: 40,
+      question: "Koje godine je počeo Drugi svjetski rat?",
+      answer: "1939",
     },
   ]);
   const deleteQuiz = (quizId: number) => {
@@ -186,7 +342,11 @@ const DataProvider = ({ children }: MyProviderProps) => {
 
   const addNewQuiz = (quiz: NewQuizProps, isEditing?: number) => {
     const newQuiz: Quiz = {
-      id: isEditing ? isEditing : quizzes[quizzes.length - 1].id + 1,
+      id: isEditing
+        ? isEditing
+        : quizzes.length > 0
+        ? quizzes[quizzes.length - 1].id + 1
+        : 1,
       name: quiz?.name,
       questions: [],
     };
