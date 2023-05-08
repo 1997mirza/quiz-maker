@@ -1,15 +1,15 @@
 import styled from "styled-components";
-import React, { useContext, useEffect, useRef, useState } from "react";
-import { Carousel } from "antd";
+import React, { useEffect, useRef, useState } from "react";
+import { Carousel, Spin } from "antd";
 import { CarouselRef } from "antd/lib/carousel";
 import BrainLogo from "../assets/brain-logo.png";
 import { useNavigate, useParams } from "react-router-dom";
-import { DataContext } from "../DataProvider";
 import {
   Container,
   ProjectPrimaryButton,
 } from "../components/shared/utilities";
 import { Question } from "../../types/question";
+import { QuizApi } from "../http/quiz/quizApi";
 
 interface ExtendedQuestion extends Question {
   isAnswerShown: boolean;
@@ -28,34 +28,39 @@ export default function QuizSlider() {
       isAnswerShown: boolean;
     }[];
   }>();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | undefined>();
 
   const carouselRef = useRef<CarouselRef>(null);
-  const { getQuizWithQuestions } = useContext(DataContext);
   const params = useParams();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const originalObject = getQuizWithQuestions(parseInt(params?.id as string));
-    if (!originalObject) {
-      setTimeout(() => {
-        navigate("/");
-      }, 3500);
-      return;
+  const fetchData = async () => {
+    try {
+      setIsLoading(true);
+      const res = await QuizApi.getQuiz(parseInt(params?.id as string));
+      const updatedQuestions = res.data.questions.map((q) => ({
+        ...q,
+        isAnswerShown: false,
+      }));
+      setQuiz({
+        ...res.data,
+        questions: updatedQuestions as {
+          id: number;
+          question: string;
+          answer: string;
+          isAnswerShown: boolean;
+        }[],
+      });
+      setIsLoading(false);
+    } catch (error: any) {
+      setError(error.message);
+      setIsLoading(false);
     }
-    if (!originalObject) return;
-    const updatedQuestions = originalObject?.questions.map((q) => ({
-      ...q,
-      isAnswerShown: false,
-    }));
-    setQuiz({
-      ...originalObject,
-      questions: updatedQuestions as {
-        id: number;
-        question: string;
-        answer: string;
-        isAnswerShown: boolean;
-      }[],
-    });
+  };
+
+  useEffect(() => {
+    fetchData();
   }, []);
 
   const updateAnswerStatus = (carouselIndex: number) => {
@@ -73,14 +78,17 @@ export default function QuizSlider() {
     }
   };
 
-  if (!quiz)
+  if (isLoading || !!error)
     return (
       <CustomContainer style={{ textAlign: "center" }}>
-        <h3 style={{ color: "white" }}>
-          The quiz was not found. You will be redirected to the homepage.
-        </h3>
+        {isLoading ? (
+          <Spin spinning={true} />
+        ) : (
+          <h3 style={{ color: "red" }}>{error}</h3>
+        )}
       </CustomContainer>
     );
+  if (!quiz) return null;
   return (
     <CustomContainer>
       {!isQuizFinished && (
@@ -132,7 +140,7 @@ export default function QuizSlider() {
             >
               Previous question
             </ProjectPrimaryButton>
-            {!quiz.questions[carouselIndex].isAnswerShown && (
+            {!quiz?.questions[carouselIndex].isAnswerShown && (
               <ProjectPrimaryButton
                 onClick={() => updateAnswerStatus(carouselIndex)}
               >

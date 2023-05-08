@@ -1,9 +1,9 @@
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
-import { Card as AntCard, Skeleton, Switch } from "antd";
-import { useContext } from "react";
-import { DataContext } from "../../DataProvider";
+import { Card as AntCard, message } from "antd";
+import { useState } from "react";
+import { QuizApi } from "../../http/quiz/quizApi";
 const { Meta } = AntCard;
 
 interface StyledTableProps {
@@ -12,10 +12,23 @@ interface StyledTableProps {
 }
 
 export default function Cards({ title, id }: StyledTableProps) {
-  const { deleteQuiz } = useContext(DataContext);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const deleteQuiz = async (quizId: number) => {
+    try {
+      setIsDeleting(true);
+      await QuizApi.deleteQuiz(quizId);
+      message.success("The quiz has been successfully deleted");
+      setIsDeleting(false);
+    } catch (error: any) {
+      message.error(error.message);
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <Link to={`/quiz/${id}`}>
       <CustomAntCard
+        aria-disabled={isDeleting}
         style={{ width: "100%", marginBottom: "16px" }}
         actions={[
           <Link to={`/quiz/${id}/edit`}>

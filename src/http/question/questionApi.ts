@@ -1,4 +1,5 @@
 import { apiClient } from "../client";
-// export const questionApi = {
-//     getQuestions: () => apiClient.get<Question[]>('/questions')
-// }
+import { Question } from "../../../types/question";
+export const QuestionApi = {
+  getQuestions: () => apiClient.get<Question[]>("/questions"),
+};

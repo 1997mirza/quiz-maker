@@ -1,8 +1,9 @@
+// The component is used for editing the quiz as well.
+
 import styled from "styled-components";
-import React, { useContext, useEffect, useState } from "react";
-import { Button, Input, message, Select } from "antd";
+import React, { useEffect, useState } from "react";
+import { Button, Input, message, Select, Spin } from "antd";
 import TextArea from "antd/es/input/TextArea";
-import { DataContext } from "../DataProvider";
 import { CloseCircleOutlined } from "@ant-design/icons";
 import BrainLogo from "../assets/brain-logo.png";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
@@ -11,86 +12,143 @@ import {
   Title,
   ProjectPrimaryButton,
 } from "../components/shared/utilities";
+import { QuizApi } from "../http/quiz/quizApi";
+import { QuestionApi } from "../http/question/questionApi";
+import { Quiz } from "../../types/quiz";
+import { Question } from "../../types/question";
 
-interface QuizQuestion {
-  type: "existing" | "new";
-  id?: number;
-  question?: string;
-  answer?: string;
+interface QuestionWithType extends Question {
+  type: "new" | "existing";
 }
-
-export interface NewQuizProps {
-  name: string;
-  questions: QuizQuestion[];
+interface QuizWithTypedQuestion extends Quiz {
+  questions: QuestionWithType[];
 }
 
 export default function CreateNew() {
-  const { existingQuestions, addNewQuiz, getQuiz } = useContext(DataContext);
   const [isQuizAdded, setIsQuizAdded] = useState(false);
-  const [questions, setQuestions] =
-    useState<{ value: number; label: string }[]>();
-  const [newQuiz, setNewQuiz] = useState<NewQuizProps>({
+  const [questions, setQuestions] = useState<Question[]>();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | undefined>();
+  // for my custom validation
+  const [errors, setErrors] = useState<boolean[]>([]);
+  const [hasName, setHasName] = useState(true);
+
+  const [newQuiz, setNewQuiz] = useState<QuizWithTypedQuestion>({
+    id: 0,
     name: "",
     questions: [],
   });
   const [quizFound, setQuizFound] = useState(false);
 
+  const navigate = useNavigate();
   const router = useLocation();
-  const currentRoute = router.pathname;
-  const isEditing = currentRoute.includes("edit");
   const params = useParams();
 
-  const [errors, setErrors] = useState<boolean[]>([]);
-  const [hasName, setHasName] = useState(true);
-  const navigate = useNavigate();
+  const currentRoute = router.pathname;
+  const isEditing = currentRoute.includes("edit");
+
   const onChange = (value: number, index: number) => {
+    //If the question already exists in the quiz, display a warning.
     const alreadySelected = newQuiz.questions.some(
       (question) => question.id === value
     );
     if (alreadySelected)
       message.warning("The selected question is already in the quiz.");
+    // Find the question, then update the quiz with the question values.
     const newQuestions = newQuiz.questions;
-    newQuestions[index].id = value;
+    const questionToUpdate = questions?.find((q) => q.id === value);
+    if (questionToUpdate) {
+      newQuestions[index] = {
+        ...newQuestions[index],
+        question: questionToUpdate.question,
+        answer: questionToUpdate.answer,
+        id: value,
+      };
+    }
     setNewQuiz((prevQuiz) => ({
       ...prevQuiz,
       questions: newQuestions,
     }));
   };
 
-  const getQuestionById = (questionId: number) => {
-    return existingQuestions?.find((question) => question.id === questionId);
+  const getQuestions = async () => {
+    try {
+      setIsLoading(true);
+      const res = await QuestionApi.getQuestions();
+      setQuestions(res.data);
+      setIsLoading(false);
+    } catch (error: any) {
+      setError(error.message);
+      setIsLoading(false);
+    }
+  };
+
+  const getQuizById = async () => {
+    try {
+      setIsLoading(true);
+      const res = await QuizApi.getQuiz(parseInt(params?.id as string));
+      setQuizFound(true);
+      //Set the type of the question to 'new' in order to be able to update it.
+      setNewQuiz({
+        name: res.data.name,
+        id: res.data.id,
+        questions: res.data.questions.map((question: Question) => {
+          return {
+            id: question.id,
+            question: question.question,
+            answer: question.answer,
+            type: "new",
+          };
+        }),
+      });
+      setIsLoading(false);
+    } catch (error: any) {
+      setError(error.message);
+      setIsLoading(false);
+      setQuizFound(false);
+      setTimeout(() => {
+        navigate("/");
+      }, 3500);
+    }
   };
 
   useEffect(() => {
     if (isEditing) {
-      const quizForEdit = getQuiz(parseInt(params?.id as string));
-      setQuizFound(!!quizForEdit);
-      if (!quizForEdit) {
-        setTimeout(() => {
-          navigate("/");
-        }, 3500);
-      } else {
-        setNewQuiz({
-          name: quizForEdit.name,
-          questions: quizForEdit.questions.map((index: number) => {
-            return {
-              type: "new",
-              question: getQuestionById(index)?.question,
-              answer: getQuestionById(index)?.answer,
-              id: getQuestionById(index)?.id,
-            };
-          }),
-        });
-      }
+      getQuizById();
     }
-    setQuestions(
-      existingQuestions.map((item) => ({
-        value: item.id,
-        label: item.question,
-      }))
-    );
+    getQuestions();
   }, []);
 
+  const addQuiz = async () => {
+    //The same function is used for both adding and editing the quiz.
+    // In case of adding a new quiz, the attribute value is set to zero.
+    try {
+      setIsLoading(true);
+      // remove type attribute from question
+      const quizToAdd: Quiz = {
+        id: newQuiz.id,
+        name: newQuiz.name,
+        questions: newQuiz.questions.map((q) => ({
+          id: q.id,
+          question: q.question,
+          answer: q.answer,
+        })),
+      };
+      if (isEditing) {
+        await QuizApi.editQuiz(quizToAdd, parseInt(params?.id as string));
+      } else {
+        await QuizApi.addQuiz(quizToAdd);
+      }
+      message.success(`Quiz successfully ${isEditing ? "edited" : "added"}.`);
+      setIsQuizAdded(true);
+      setIsLoading(false);
+    } catch (error: any) {
+      message.error(
+        "An error occurred while adding the quiz. Please try again!"
+      );
+      setIsLoading(false);
+    }
+  };
   const onChangeTextArea = (
     value: string,
     index: number,
@@ -105,6 +163,9 @@ export default function CreateNew() {
   };
 
   const onValidate = () => {
+    //Because of the specificity of the form, the useForm hook was not used.
+    //custom validation
+
     if (newQuiz.questions.length === 0) {
       message.error("The quiz must contain at least one question.");
       return;
@@ -117,36 +178,33 @@ export default function CreateNew() {
 
     const errorArray: boolean[] = [];
 
-    newQuiz.questions.forEach((question) => {
-      if (
-        (question.type === "existing" && !!question.id) ||
-        (question.type === "new" && !!question.question && !!question.answer)
-      ) {
-        errorArray.push(false);
-      } else {
-        errorArray.push(true);
-      }
-    });
-
     setErrors(errorArray);
 
     if (errorArray.some((bool) => bool)) {
       return;
     } else {
-      addNewQuiz(newQuiz, parseInt(params?.id as string));
+      // addQuiz(newQuiz, parseInt(params?.id as string));
+      addQuiz();
       setIsQuizAdded(true);
     }
   };
 
-  if (isEditing && !quizFound) {
+  if (isLoading || !quizFound) {
     return (
       <CustomContainer style={{ textAlign: "center" }}>
-        <h3 style={{ color: "white" }}>
-          The quiz was not found. You will be redirected to the homepage.
-        </h3>
+        {isLoading ? (
+          <Spin spinning={true} />
+        ) : (
+          <h3 style={{ color: "white" }}>
+            {error ??
+              "The quiz was not found. You will be redirected to the homepage."}
+          </h3>
+        )}
       </CustomContainer>
     );
   }
+
+  if (!questions) return null;
 
   return (
     <CustomContainer>
@@ -183,7 +241,7 @@ export default function CreateNew() {
             }}
           />
           {!hasName && <p style={{ color: "red" }}>* This field is required</p>}
-          {newQuiz.questions.map((question: QuizQuestion, indexGlobal) => {
+          {newQuiz.questions.map((question: QuestionWithType, indexGlobal) => {
             if (question.type === "existing") {
               return (
                 <div key={indexGlobal}>
@@ -195,7 +253,10 @@ export default function CreateNew() {
                       onChange={(e) => {
                         onChange(e, indexGlobal);
                       }}
-                      options={questions}
+                      options={questions?.map((question) => ({
+                        value: question.id,
+                        label: question.question,
+                      }))}
                       value={newQuiz.questions[indexGlobal].id}
                     />
                     <Button
@@ -282,7 +343,12 @@ export default function CreateNew() {
                   ...prevQuiz,
                   questions: [
                     ...prevQuiz.questions,
-                    { type: "new", question: undefined, answer: undefined },
+                    {
+                      type: "new",
+                      id: 0,
+                      question: "",
+                      answer: "",
+                    },
                   ],
                 }));
               }}
@@ -296,7 +362,7 @@ export default function CreateNew() {
                   ...prevQuiz,
                   questions: [
                     ...prevQuiz.questions,
-                    { type: "existing", id: undefined },
+                    { type: "existing", id: 0, question: "", answer: "" },
                   ],
                 }));
               }}
@@ -305,7 +371,11 @@ export default function CreateNew() {
             </Option>
           </AddQuestionOptionsContainer>
           <div>
-            <ProjectPrimaryButton onClick={() => onValidate()}>
+            <ProjectPrimaryButton
+              disabled={isLoading}
+              loading={isLoading}
+              onClick={() => onValidate()}
+            >
               {isEditing ? "Save" : "Add Quiz"}
             </ProjectPrimaryButton>
           </div>

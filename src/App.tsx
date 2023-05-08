@@ -1,15 +1,11 @@
 import React, { createContext, useEffect, useState } from "react";
 import "./App.css";
-import { Button, ConfigProvider } from "antd";
+import { ConfigProvider } from "antd";
 import { Route, Routes } from "react-router-dom";
-
-import { Question } from "../types/question";
-import { Quiz } from "../types/quiz";
 import Home from "./pages/home";
 import CreateNew from "./pages/create-new";
 import QuizSlider from "./pages/quiz";
 import styled from "styled-components";
-import { DataProvider } from "./DataProvider";
 import TopSection from "./components/topSection";
 
 function App() {
@@ -23,14 +19,12 @@ function App() {
     >
       <Layout>
         <TopSection />
-        <DataProvider>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/quiz/:id/edit" element={<CreateNew />} />
-            <Route path="/create-new" element={<CreateNew />} />
-            <Route path="/quiz/:id" element={<QuizSlider />} />
-          </Routes>
-        </DataProvider>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/quiz/:id/edit" element={<CreateNew />} />
+          <Route path="/create-new" element={<CreateNew />} />
+          <Route path="/quiz/:id" element={<QuizSlider />} />
+        </Routes>
       </Layout>
     </ConfigProvider>
   );

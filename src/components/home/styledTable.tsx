@@ -1,11 +1,11 @@
-import { Table } from "antd";
+import { message, Table } from "antd";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import { Quiz } from "../../../types/quiz";
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
-import { useContext } from "react";
-import { DataContext } from "../../DataProvider";
 import { ProjectPrimaryButton } from "../shared/utilities";
+import { QuizApi } from "../../http/quiz/quizApi";
+import { useState } from "react";
 
 interface StyledTableProps {
   data: Quiz[];
@@ -13,8 +13,8 @@ interface StyledTableProps {
 }
 
 export default function StyledTable({ data, loading }: StyledTableProps) {
-  const { deleteQuiz } = useContext(DataContext);
   const navigate = useNavigate();
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const columns = [
     {
@@ -32,6 +32,7 @@ export default function StyledTable({ data, loading }: StyledTableProps) {
       render: ({ id }: Quiz) => (
         <>
           <ProjectPrimaryButton
+            disabled={isDeleting}
             type="primary"
             icon={<DeleteOutlined />}
             style={{ marginRight: "10px" }}
@@ -43,6 +44,8 @@ export default function StyledTable({ data, loading }: StyledTableProps) {
             Delete
           </ProjectPrimaryButton>
           <ProjectPrimaryButton
+            disabled={isDeleting}
+            loading={isDeleting}
             type="primary"
             icon={<EditOutlined />}
             onClick={(e) => {
@@ -56,6 +59,18 @@ export default function StyledTable({ data, loading }: StyledTableProps) {
       ),
     },
   ];
+
+  const deleteQuiz = async (quizId: number) => {
+    try {
+      setIsDeleting(true);
+      await QuizApi.deleteQuiz(quizId);
+      message.success("The quiz has been successfully deleted");
+      setIsDeleting(false);
+    } catch (error: any) {
+      message.error(error.message);
+      setIsDeleting(false);
+    }
+  };
 
   return (
     <CustomTable

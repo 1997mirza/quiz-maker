@@ -1,5 +1,7 @@
-export type Quiz = {
+import { Question } from "./question";
+
+export interface Quiz {
   id: number;
   name: string;
-  questions: number[];
-};
+  questions: Question[];
+}
